@@ -41,7 +41,6 @@ function randomPhoneNumber() {
       Math.floor(Math.random() * phoneNumbers.length - 1)
     ].toString();
   let concat = "";
-  console.log(startingDigit);
 
   if (startingDigit.length === 1) {
     concat = "" + startingDigit + Math.random().toString().slice(2, 9);
