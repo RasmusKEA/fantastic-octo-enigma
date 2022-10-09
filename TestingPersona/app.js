@@ -35,6 +35,32 @@ con.connect((err) => {
   }
 });
 
+async function allDetails() {
+  let adr = await getInfo();
+  generateAddress(adr);
+
+  person.firstName = pickRandomPerson().name;
+  person.lastName = pickRandomPerson().surname;
+  person.gender = pickRandomPerson().gender;
+  person.phone = randomPhoneNumber();
+  person.address = generateAddress(adr);
+  person.cpr = generateCPR(person.gender);
+
+  console.log(person);
+  return person;
+}
+
+function pickRandomPerson() {
+  const fs = require("fs");
+  let json = fs.readFileSync("./test.json");
+  let jsonify = JSON.parse(json);
+
+  let random = Math.floor(Math.random() * jsonify.persons.length - 1);
+  let randomPerson = jsonify.persons[random];
+
+  return randomPerson;
+}
+
 function randomPhoneNumber() {
   let startingDigit =
     phoneNumbers[
@@ -52,29 +78,6 @@ function randomPhoneNumber() {
     concat = "" + startingDigit + Math.random().toString().slice(2, 7);
     return concat;
   }
-}
-
-async function allDetails() {
-  const fs = require("fs");
-  let json = fs.readFileSync("./test.json");
-  let jsonify = JSON.parse(json);
-
-  let random = Math.floor(Math.random() * jsonify.persons.length - 1);
-  let randomPerson = jsonify.persons[random];
-
-  let adr = await getInfo();
-
-  person.firstName = randomPerson.name;
-  person.lastName = randomPerson.surname;
-  person.gender = randomPerson.gender;
-  person.phone = randomPhoneNumber();
-  person.address = generateAddress(adr);
-  person.cpr = generateCPR(person.gender);
-
-  generateAddress(adr);
-
-  console.log(person);
-  return person;
 }
 
 function generateAddress(value) {
