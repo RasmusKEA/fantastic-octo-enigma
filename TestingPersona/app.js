@@ -52,15 +52,16 @@ function pickRandomPerson() {
 }
 
 function randomPhoneNumber() {
-  let startingDigit =
-    phoneNumbers[Math.floor(Math.random(2, 8) * phoneNumbers.length - 1)];
+  let startingDigit = String(
+    phoneNumbers[Math.floor(Math.random(2, 8) * phoneNumbers.length - 1)]
+  );
   startingDigit;
   let concat = "";
 
-  if (startingDigit.toString().length === 1) {
+  if (startingDigit.length === 1) {
     concat = "" + startingDigit + Math.random().toString().slice(2, 9);
     return concat;
-  } else if (startingDigit.toString().length === 2) {
+  } else if (startingDigit.length === 2) {
     concat = "" + startingDigit + Math.random().toString().slice(2, 8);
     return concat;
   } else {
@@ -142,25 +143,18 @@ function CPRNameAndGender() {
 }
 
 function CPRNameGenderAndDoB() {
+  let cpr = generateCPR(pickRandomPerson().gender);
   return {
     firstName: pickRandomPerson().name,
     lastName: pickRandomPerson().surname,
     gender: pickRandomPerson().gender,
-    CPR: generateCPR(pickRandomPerson().gender),
-    DoB: generateCPR(pickRandomPerson().gender).slice(0, 6),
+    CPR: cpr,
+    DoB: cpr.slice(0, 6),
   };
 }
 
 async function allDetailsBulk(amount) {
   let bulk = [];
-  let person = {
-    firstName: "",
-    lastName: "",
-    gender: "",
-    phone: "",
-    address: "",
-    cpr: "",
-  };
 
   if (amount < 2 || amount > 100) {
     return "Amount is not between 2 and 100";
@@ -168,10 +162,10 @@ async function allDetailsBulk(amount) {
 
   for (let index = 0; index < amount; index++) {
     bulk.push({
-      firstName: allDetails().firstName,
-      lastName: allDetails().lastName,
+      firstName: (await allDetails()).firstName,
+      lastName: (await allDetails()).lastName,
       gender: (await allDetails()).gender,
-      phone: allDetails().phone,
+      phone: await allDetails().phone,
       address: (await allDetails()).address,
       cpr: (await allDetails()).cpr,
     });
