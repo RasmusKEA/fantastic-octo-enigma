@@ -1,15 +1,6 @@
 var mysql = require("mysql2");
 var moment = require("moment");
 
-let person = {
-  firstName: "",
-  lastName: "",
-  gender: "",
-  cpr: "",
-  address: "",
-  phone: "",
-};
-
 let phoneNumbers = [
   2, 30, 31, 40, 41, 42, 50, 51, 52, 53, 60, 61, 71, 81, 91, 92, 93, 342, 344,
   345, 346, 347, 348, 349, 356, 357, 359, 362, 365, 366, 389, 398, 431, 441,
@@ -36,18 +27,17 @@ con.connect((err) => {
 });
 
 async function allDetails() {
-  let adr = await getInfo();
-  generateAddress(adr);
+  let gender = pickRandomPerson().gender;
+  let adr = await generateAddress();
 
-  person.firstName = pickRandomPerson().name;
-  person.lastName = pickRandomPerson().surname;
-  person.gender = pickRandomPerson().gender;
-  person.phone = randomPhoneNumber();
-  person.address = generateAddress(adr);
-  person.cpr = generateCPR(person.gender);
-
-  console.log(person);
-  return person;
+  return {
+    firstName: pickRandomPerson().name,
+    lastName: pickRandomPerson().surname,
+    gender: gender,
+    phone: randomPhoneNumber(),
+    address: adr,
+    cpr: generateCPR(gender),
+  };
 }
 
 function pickRandomPerson() {
@@ -63,15 +53,14 @@ function pickRandomPerson() {
 
 function randomPhoneNumber() {
   let startingDigit =
-    phoneNumbers[
-      Math.floor(Math.random() * phoneNumbers.length - 1)
-    ].toString();
+    phoneNumbers[Math.floor(Math.random() * phoneNumbers.length - 1)];
+  startingDigit;
   let concat = "";
 
-  if (startingDigit.length === 1) {
+  if (startingDigit.toString().length === 1) {
     concat = "" + startingDigit + Math.random().toString().slice(2, 9);
     return concat;
-  } else if (startingDigit.length === 2) {
+  } else if (startingDigit.toString().length === 2) {
     concat = "" + startingDigit + Math.random().toString().slice(2, 8);
     return concat;
   } else {
@@ -80,10 +69,11 @@ function randomPhoneNumber() {
   }
 }
 
-function generateAddress(value) {
+async function generateAddress() {
+  let adr = await getInfo();
   let postalCodes = [];
   let address = "";
-  postalCodes = value;
+  postalCodes = adr;
 
   var randomAddress = "";
   var characters = "abcdefghijklmnopqrstuvwxyzæøå";
@@ -104,7 +94,6 @@ function generateAddress(value) {
 async function getInfo() {
   var sql = "SELECT * FROM postal_code";
   const results = await con.promise().query(sql);
-  con.end();
   return results[0];
 }
 
@@ -114,15 +103,15 @@ function generateCPR(gender) {
   );
 
   if (gender === "male") {
-    let endingDigits = Math.floor(1000 + (Math.random() * 9000) / 2) * 2;
-    if (endingDigits > 10000) {
-      endingDigits = Math.floor(1000 + (Math.random() * 9000) / 2) * 2;
-    }
-    return birthday + "-" + endingDigits;
-  } else if (gender === "female") {
     let endingDigits = Math.floor(1000 + (Math.random() * 9000) / 2) * 2 + 1;
     if (endingDigits > 10000) {
       endingDigits = Math.floor(1000 + (Math.random() * 9000) / 2) * 2 + 1;
+    }
+    return birthday + "-" + endingDigits;
+  } else if (gender === "female") {
+    let endingDigits = Math.floor(1000 + (Math.random() * 9000) / 2) * 2;
+    if (endingDigits > 10000) {
+      endingDigits = Math.floor(1000 + (Math.random() * 9000) / 2) * 2;
     }
     return birthday + "-" + endingDigits;
   }
@@ -134,4 +123,79 @@ function randomDate(start, end) {
   );
 }
 
-allDetails();
+function nameGenderAndDoB() {
+  return {
+    firstName: pickRandomPerson().name,
+    lastName: pickRandomPerson().surname,
+    gender: pickRandomPerson().gender,
+    DoB: generateCPR(pickRandomPerson().gender).slice(0, 6),
+  };
+}
+
+function CPRNameAndGender() {
+  return {
+    firstName: pickRandomPerson().name,
+    lastName: pickRandomPerson().surname,
+    gender: pickRandomPerson().gender,
+    CPR: generateCPR(pickRandomPerson().gender),
+  };
+}
+
+function CPRNameGenderAndDoB() {
+  return {
+    firstName: pickRandomPerson().name,
+    lastName: pickRandomPerson().surname,
+    gender: pickRandomPerson().gender,
+    CPR: generateCPR(pickRandomPerson().gender),
+    DoB: generateCPR(pickRandomPerson().gender).slice(0, 6),
+  };
+}
+
+async function allDetailsBulk(amount) {
+  let bulk = [];
+  let person = {
+    firstName: "",
+    lastName: "",
+    gender: "",
+    phone: "",
+    address: "",
+    cpr: "",
+  };
+
+  if (amount < 2 || amount > 100) {
+    return "Amount is not between 2 and 100";
+  }
+
+  for (let index = 0; index < amount; index++) {
+    bulk.push({
+      firstName: allDetails().firstName,
+      lastName: allDetails().lastName,
+      gender: (await allDetails()).gender,
+      phone: allDetails().phone,
+      address: (await allDetails()).address,
+      cpr: (await allDetails()).cpr,
+    });
+  }
+  return bulk;
+}
+
+console.log(
+  "Name, gender, CPR and DoB: " + JSON.stringify(CPRNameGenderAndDoB())
+);
+console.log("Name, gender and DoB: " + JSON.stringify(nameGenderAndDoB()));
+console.log("Name, gender and CPR: " + JSON.stringify(CPRNameAndGender()));
+console.log("Female CPR: " + generateCPR("female"));
+console.log("Male CPR: " + generateCPR("male"));
+console.log("Birthday: " + generateCPR("male").slice(0, 6));
+console.log("Phone number: " + JSON.stringify(randomPhoneNumber()));
+console.log("Full name and gender: " + JSON.stringify(pickRandomPerson()));
+allDetails().then((d) => {
+  console.log("All details: " + JSON.stringify(d));
+});
+generateAddress().then((a) => {
+  console.log("Address: " + JSON.stringify(a));
+});
+
+allDetailsBulk(5).then((b) => {
+  console.log("Bulk: " + JSON.stringify(b));
+});
