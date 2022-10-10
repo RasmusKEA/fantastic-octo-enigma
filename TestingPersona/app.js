@@ -27,16 +27,16 @@ con.connect((err) => {
 });
 
 async function allDetails() {
-  let gender = pickRandomPerson().gender;
+  let gender = (await pickRandomPerson()).gender;
   let adr = await generateAddress();
 
   return {
-    firstName: pickRandomPerson().name,
-    lastName: pickRandomPerson().surname,
+    firstName: (await pickRandomPerson()).name,
+    lastName: (await pickRandomPerson()).surname,
     gender: gender,
-    phone: randomPhoneNumber(),
+    phone: await randomPhoneNumber(),
     address: adr,
-    cpr: generateCPR(gender),
+    cpr: await generateCPR(gender),
   };
 }
 
@@ -53,7 +53,7 @@ function pickRandomPerson() {
 
 function randomPhoneNumber() {
   let startingDigit =
-    phoneNumbers[Math.floor(Math.random() * phoneNumbers.length - 1)];
+    phoneNumbers[Math.floor(Math.random(2, 8) * phoneNumbers.length - 1)];
   startingDigit;
   let concat = "";
 
@@ -73,7 +73,7 @@ async function generateAddress() {
   let adr = await getInfo();
   let postalCodes = [];
   let address = "";
-  postalCodes = adr;
+  postalCodes = await adr;
 
   var randomAddress = "";
   var characters = "abcdefghijklmnopqrstuvwxyzæøå";
