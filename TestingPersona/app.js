@@ -13,7 +13,7 @@ let phoneNumbers = [
 var con = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "Gubbiman1",
+  password: "password",
   database: "addresses",
   port: "3306",
 });
@@ -69,8 +69,6 @@ function randomPhoneNumber() {
     return concat;
   }
 }
-
-module.exports = randomPhoneNumber;
 
 async function generateAddress() {
   let adr = await getInfo();
@@ -304,3 +302,12 @@ generateAddress().then((a) => {
 allDetailsBulk(5).then((b) => {
   console.log("Bulk: " + JSON.stringify(b));
 });
+
+module.exports = {
+  CPRNameGenderAndDoB: CPRNameGenderAndDoB,
+  nameGenderAndDoB: nameGenderAndDoB,
+  CPRNameAndGender: CPRNameAndGender,
+  randomPhoneNumber: randomPhoneNumber,
+  pickRandomPerson: pickRandomPerson,
+  generateCPR: generateCPR,
+};
